@@ -3,6 +3,8 @@ package de.jojo.main;
 import de.jojo.compression.*;
 import de.jojo.compression.rle.RLE2Compression;
 import de.jojo.compression.rle.RLE3Compression;
+import de.jojo.exceptions.CompressionException;
+
 import org.apache.commons.cli.*;
 
 import java.io.*;
@@ -87,6 +89,9 @@ public class Main {
                 }
             } catch(IOException e) {
                 System.err.println("[ERR] Error whilst un-/compressing files!");
+                System.exit(5);
+            } catch(CompressionException e) {
+                System.err.println(String.format("[ERR] %s", e.getMessage()));
                 System.exit(4);
             }
     

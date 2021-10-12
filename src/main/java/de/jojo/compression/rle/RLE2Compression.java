@@ -1,6 +1,7 @@
 package de.jojo.compression.rle;
 
 import de.jojo.compression.Compression;
+import de.jojo.exceptions.CompressionException;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -9,7 +10,7 @@ import java.io.OutputStream;
 public class RLE2Compression implements Compression {
 
     @Override
-    public void Compress(InputStream inputStream, OutputStream outputStream) throws IOException {
+    public void Compress(InputStream inputStream, OutputStream outputStream) throws IOException, CompressionException {
         outputStream.write("RL2".getBytes());
 
         byte[] data = inputStream.readAllBytes();
@@ -17,6 +18,9 @@ public class RLE2Compression implements Compression {
         int count = 0;
 
         for (byte cur : data) {
+            if ((cur & 0x80) != 0)
+                throw new CompressionException("This is not an ascii file, aborting!");
+
             if (last == cur) {
                 count++;
             } else {
@@ -54,8 +58,10 @@ public class RLE2Compression implements Compression {
     }
 
     @Override
-    public void Decompress(InputStream inputStream, OutputStream outputStream) throws IOException {
-        inputStream.readNBytes(3);
+    public void Decompress(InputStream inputStream, OutputStream outputStream) throws IOException, CompressionException {
+        if (inputStream.readNBytes(3).equals("RL2".getBytes())) {
+            throw new CompressionException("Invalid magic number!");
+        }
 
         byte[] data = inputStream.readAllBytes();
 
@@ -64,6 +70,10 @@ public class RLE2Compression implements Compression {
 
             if ((cur & 0x80) != 0) {
                 byte character = data[++i];
+
+                if ((character & 0x80) != 0) {
+                    throw new CompressionException("File corrupt, cannot have to modifier bytes in a row!");
+                }
                 this.writeToDecompressionStream(character, (int) (cur & 0x7f), outputStream);
             } else {
                 this.writeToDecompressionStream(cur, 1, outputStream);

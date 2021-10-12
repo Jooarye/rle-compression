@@ -1,6 +1,7 @@
 package de.jojo.compression.rle;
 
 import de.jojo.compression.Compression;
+import de.jojo.exceptions.CompressionException;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -9,7 +10,7 @@ import java.io.OutputStream;
 public class RLE3Compression implements Compression {
 
     @Override
-    public void Compress(InputStream inputStream, OutputStream outputStream) throws IOException {
+    public void Compress(InputStream inputStream, OutputStream outputStream) throws IOException, CompressionException {
         outputStream.write("RL3".getBytes());
 
         byte[] data = inputStream.readAllBytes();
@@ -59,9 +60,11 @@ public class RLE3Compression implements Compression {
     }
 
     @Override
-    public void Decompress(InputStream inputStream, OutputStream outputStream) throws IOException {
-        inputStream.readNBytes(3);
-        
+    public void Decompress(InputStream inputStream, OutputStream outputStream) throws IOException, CompressionException {
+        if (inputStream.readNBytes(3).equals("RL3".getBytes())) {
+            throw new CompressionException("Invalid magic number!");
+        }
+
         byte[] data = inputStream.readAllBytes();
         int i = 0;
 
