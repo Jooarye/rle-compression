@@ -11,6 +11,7 @@ public class RLE2Compression implements Compression {
 
     @Override
     public void Compress(InputStream inputStream, OutputStream outputStream) throws IOException, CompressionException {
+        // Magic number
         outputStream.write("RL2".getBytes());
 
         byte[] data = inputStream.readAllBytes();
@@ -59,6 +60,7 @@ public class RLE2Compression implements Compression {
 
     @Override
     public void Decompress(InputStream inputStream, OutputStream outputStream) throws IOException, CompressionException {
+        // Magic number check
         if (inputStream.readNBytes(3).equals("RL2".getBytes())) {
             throw new CompressionException("Invalid magic number!");
         }
@@ -71,9 +73,9 @@ public class RLE2Compression implements Compression {
             if ((cur & 0x80) != 0) {
                 byte character = data[++i];
 
-                if ((character & 0x80) != 0) {
+                if ((character & 0x80) != 0)
                     throw new CompressionException("File corrupt, cannot have to modifier bytes in a row!");
-                }
+
                 this.writeToDecompressionStream(character, (int) (cur & 0x7f), outputStream);
             } else {
                 this.writeToDecompressionStream(cur, 1, outputStream);

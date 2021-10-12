@@ -11,6 +11,7 @@ public class RLE3Compression implements Compression {
 
     @Override
     public void Compress(InputStream inputStream, OutputStream outputStream) throws IOException, CompressionException {
+        // Magic number
         outputStream.write("RL3".getBytes());
 
         byte[] data = inputStream.readAllBytes();
@@ -61,6 +62,7 @@ public class RLE3Compression implements Compression {
 
     @Override
     public void Decompress(InputStream inputStream, OutputStream outputStream) throws IOException, CompressionException {
+        // Magic number check
         if (inputStream.readNBytes(3).equals("RL3".getBytes())) {
             throw new CompressionException("Invalid magic number!");
         }
