@@ -10,6 +10,8 @@ public class RLE3Compression implements Compression {
 
     @Override
     public void Compress(InputStream inputStream, OutputStream outputStream) throws IOException {
+        outputStream.write("RL3".getBytes());
+
         byte[] data = inputStream.readAllBytes();
         byte last = 0;
         byte count = 0;
@@ -58,6 +60,8 @@ public class RLE3Compression implements Compression {
 
     @Override
     public void Decompress(InputStream inputStream, OutputStream outputStream) throws IOException {
+        inputStream.readNBytes(3);
+        
         byte[] data = inputStream.readAllBytes();
         int i = 0;
 
