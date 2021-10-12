@@ -17,9 +17,16 @@ public class Main {
         options.addOption("i", "inputfile", true, "Input file");
         options.addOption("o", "outputfile", true, "Output file");
         options.addOption("t", "type", true, "Compression type");
+        options.addOption("h", "help", false, "Display help menu");
 
         CommandLineParser parser = new BasicParser();
         CommandLine result = parser.parse(options, args);
+
+        if (result.hasOption("h") || args.length == 0) {
+            HelpFormatter fmt = new HelpFormatter();
+            fmt.printHelp("runlength", options);
+            System.exit(0);
+        }
 
         if (!result.hasOption("c") && !result.hasOption("d")) {
             System.err.println("[ERR] One of -d / -c is needed!");
