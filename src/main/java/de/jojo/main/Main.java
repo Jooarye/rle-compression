@@ -12,7 +12,7 @@ import java.io.*;
 
 public class Main {
 
-    public static void main(String[] args) throws ParseException {
+    public static void main(String[] args) {
         Options options = new Options();
 
         options.addOption("c", "compress", false, "Compress file");

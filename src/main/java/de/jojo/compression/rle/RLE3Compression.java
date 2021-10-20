@@ -15,7 +15,7 @@ public class RLE3Compression implements Compression {
     public void Compress(InputStream inputStream, OutputStream outputStream) throws IOException,
             CompressionException, FormatException {
         // Magic number
-        outputStream.write("RL3".getBytes());
+        outputStream.write("rl3".getBytes());
 
         byte[] data = inputStream.readAllBytes();
         byte last = 0;
@@ -41,10 +41,10 @@ public class RLE3Compression implements Compression {
     }
 
     private void writeToCompressionStream(byte last, int count, OutputStream stream) throws IOException {
-        if (count > 3) {
-            for (; count > 256; count -= 256) {
+        if (count > 2) {
+            for (; count > 255; count -= 255) {
                 stream.write((byte) 0x90);
-                stream.write((byte) count);
+                stream.write((byte) 255);
                 stream.write(last);
             }
 
@@ -67,7 +67,7 @@ public class RLE3Compression implements Compression {
     public void Decompress(InputStream inputStream, OutputStream outputStream) throws IOException,
             CompressionException, FormatException {
         // Magic number check
-        if (inputStream.readNBytes(3).equals("RL3".getBytes())) {
+        if (Arrays.equals(inputStream.readNBytes(3), "rl3".getBytes())) {
             throw new FormatException("Invalid magic number!");
         }
 
