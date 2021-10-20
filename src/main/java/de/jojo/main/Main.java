@@ -21,6 +21,7 @@ public class Main {
         options.addOption("o", "outputfile", true, "Output file");
         options.addOption("t", "type", true, "Compression type");
         options.addOption("h", "help", false, "Display help menu");
+        options.addOption("v", "verbose", false, "Verbose output");
 
         CommandLineParser parser = new BasicParser();
         CommandLine result = parser.parse(options, args);
@@ -48,9 +49,16 @@ public class Main {
                 switch (result.getOptionValue("t")) {
                     case "2":
                         compression = new RLE2Compression();
+
+                        if (result.hasOption("v"))
+                            System.out.println("[INFO] Compression algorithm set to RLed2");
+
                         break;
                     case "3":
                         compression = new RLE3Compression();
+
+                        if (result.hasOption("v"))
+                            System.out.println("[INFO] Compression algorithm set to RLed3");
 
                         break;
                     default:
@@ -59,11 +67,13 @@ public class Main {
                 }
             }
 
-            String outputPath = result.getOptionValue("i") + (compression instanceof RLE3Compression ? ".rld3" : ".rld2");
+            String outputPath = result.getOptionValue("i") +
+                    (compression instanceof RLE3Compression ? ".rld3" : ".rld2");
 
             if (result.hasOption('o')) {
                 outputPath = result.getOptionValue('o');
-            }
+            } else if (result.hasOption("v"))
+                System.out.printf("[INFO] No output file specified using '%s'%n", outputPath);
 
             FileInputStream fis = null;
             FileOutputStream fos = null;
@@ -110,9 +120,13 @@ public class Main {
                 System.exit(3);
             }
         } else {
-            System.err.println("[ERR] Can only use -o and -d seperately!");
+            System.err.println("[ERR] Can only use -o and -d separately!");
             System.exit(1);
         }
+
+        if (result.hasOption("v"))
+            System.out.printf("[INFO] %s was completed without issues.%n",
+                    result.hasOption('d') ? "Decompression" : "Compression");
 
         System.exit(0);
     }

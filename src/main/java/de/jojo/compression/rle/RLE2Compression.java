@@ -65,7 +65,7 @@ public class RLE2Compression implements Compression {
     public void Decompress(InputStream inputStream, OutputStream outputStream) throws IOException,
             CompressionException, FormatException {
         // Magic number check
-        if (Arrays.equals(inputStream.readNBytes(3), "RL2".getBytes())) {
+        if (inputStream.readNBytes(3).equals("RL2".getBytes())) {
             throw new FormatException("Invalid magic number!");
         }
 
