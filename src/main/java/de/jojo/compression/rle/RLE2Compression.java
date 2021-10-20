@@ -2,15 +2,18 @@ package de.jojo.compression.rle;
 
 import de.jojo.compression.Compression;
 import de.jojo.exceptions.CompressionException;
+import de.jojo.exceptions.FormatException;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.util.Arrays;
 
 public class RLE2Compression implements Compression {
 
     @Override
-    public void Compress(InputStream inputStream, OutputStream outputStream) throws IOException, CompressionException {
+    public void Compress(InputStream inputStream, OutputStream outputStream) throws IOException,
+            CompressionException, FormatException {
         // Magic number
         outputStream.write("RL2".getBytes());
 
@@ -59,26 +62,31 @@ public class RLE2Compression implements Compression {
     }
 
     @Override
-    public void Decompress(InputStream inputStream, OutputStream outputStream) throws IOException, CompressionException {
+    public void Decompress(InputStream inputStream, OutputStream outputStream) throws IOException,
+            CompressionException, FormatException {
         // Magic number check
-        if (inputStream.readNBytes(3).equals("RL2".getBytes())) {
-            throw new CompressionException("Invalid magic number!");
+        if (Arrays.equals(inputStream.readNBytes(3), "RL2".getBytes())) {
+            throw new FormatException("Invalid magic number!");
         }
 
         byte[] data = inputStream.readAllBytes();
 
         for (int i = 0; i < data.length; i++) {
-            byte cur = data[i];
+            try {
+                byte cur = data[i];
 
-            if ((cur & 0x80) != 0) {
-                byte character = data[++i];
+                if ((cur & 0x80) != 0) {
+                    byte character = data[++i];
 
-                if ((character & 0x80) != 0)
-                    throw new CompressionException("File corrupt, cannot have to modifier bytes in a row!");
+                    if ((character & 0x80) != 0)
+                        throw new CompressionException("File corrupt, cannot have to modifier bytes in a row!");
 
-                this.writeToDecompressionStream(character, (int) (cur & 0x7f), outputStream);
-            } else {
-                this.writeToDecompressionStream(cur, 1, outputStream);
+                    this.writeToDecompressionStream(character, (int) (cur & 0x7f), outputStream);
+                } else {
+                    this.writeToDecompressionStream(cur, 1, outputStream);
+                }
+            } catch (ArrayIndexOutOfBoundsException e) {
+                throw new CompressionException("Input file ended unexpectedly!");
             }
         }
         outputStream.flush();

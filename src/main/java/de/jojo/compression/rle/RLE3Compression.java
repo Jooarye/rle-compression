@@ -2,15 +2,18 @@ package de.jojo.compression.rle;
 
 import de.jojo.compression.Compression;
 import de.jojo.exceptions.CompressionException;
+import de.jojo.exceptions.FormatException;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.util.Arrays;
 
 public class RLE3Compression implements Compression {
 
     @Override
-    public void Compress(InputStream inputStream, OutputStream outputStream) throws IOException, CompressionException {
+    public void Compress(InputStream inputStream, OutputStream outputStream) throws IOException,
+            CompressionException, FormatException {
         // Magic number
         outputStream.write("RL3".getBytes());
 
@@ -61,10 +64,11 @@ public class RLE3Compression implements Compression {
     }
 
     @Override
-    public void Decompress(InputStream inputStream, OutputStream outputStream) throws IOException, CompressionException {
+    public void Decompress(InputStream inputStream, OutputStream outputStream) throws IOException,
+            CompressionException, FormatException {
         // Magic number check
-        if (inputStream.readNBytes(3).equals("RL3".getBytes())) {
-            throw new CompressionException("Invalid magic number!");
+        if (Arrays.equals(inputStream.readNBytes(3), "RL3".getBytes())) {
+            throw new FormatException("Invalid magic number!");
         }
 
         byte[] data = inputStream.readAllBytes();
@@ -74,15 +78,19 @@ public class RLE3Compression implements Compression {
             byte cur = data[i];
 
             if (cur == (byte) 0x90) {
-                byte len = data[i + 1];
+                try {
+                    byte len = data[i + 1];
 
-                if (len == 0) {
-                    this.writeToDecompressionStream((byte) 0x90, 1, outputStream);
-                    i += 2;
-                } else {
-                    byte tmp = data[i + 2];
-                    this.writeToDecompressionStream(tmp, len, outputStream);
-                    i += 3;
+                    if (len == 0) {
+                        this.writeToDecompressionStream((byte) 0x90, 1, outputStream);
+                        i += 2;
+                    } else {
+                        byte tmp = data[i + 2];
+                        this.writeToDecompressionStream(tmp, len, outputStream);
+                        i += 3;
+                    }
+                } catch (ArrayIndexOutOfBoundsException e) {
+                    throw new CompressionException("Input file ended unexpectedly!");
                 }
             } else {
                 this.writeToDecompressionStream(cur, 1, outputStream);

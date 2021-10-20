@@ -5,6 +5,7 @@ import de.jojo.compression.rle.RLE2Compression;
 import de.jojo.compression.rle.RLE3Compression;
 import de.jojo.exceptions.CompressionException;
 
+import de.jojo.exceptions.FormatException;
 import org.apache.commons.cli.*;
 
 import java.io.*;
@@ -44,7 +45,7 @@ public class Main {
             }
 
             if (result.hasOption("t")) {
-                switch(result.getOptionValue("t")) {
+                switch (result.getOptionValue("t")) {
                     case "2":
                         compression = new RLE2Compression();
                         break;
@@ -59,52 +60,52 @@ public class Main {
             }
 
             String outputPath = result.getOptionValue("i") + (compression instanceof RLE3Compression ? ".rld3" : ".rld2");
-    
+
             if (result.hasOption('o')) {
                 outputPath = result.getOptionValue('o');
             }
-    
+
             FileInputStream fis = null;
             FileOutputStream fos = null;
 
             try {
                 fis = new FileInputStream(result.getOptionValue("i"));
-            } catch(IOException e) {
+            } catch (IOException e) {
                 System.err.println("[ERR] Error whilst reading source file!");
                 System.exit(2);
             }
 
             try {
                 fos = new FileOutputStream(outputPath);
-            } catch(IOException e) {
-                System.err.println("[ERR] Error whilst reading destiantion file!");
+            } catch (IOException e) {
+                System.err.println("[ERR] Error whilst reading destination file!");
                 System.exit(3);
             }
-    
+
             try {
                 if (result.hasOption('d')) {
                     compression.Decompress(fis, fos);
                 } else {
                     compression.Compress(fis, fos);
                 }
-            } catch(IOException e) {
-                System.err.println("[ERR] Error whilst un-/compressing files!");
+            } catch (CompressionException | IOException e) {
+                System.err.printf("[ERR] %s%n", e.getMessage());
                 System.exit(5);
-            } catch(CompressionException e) {
-                System.err.println(String.format("[ERR] %s", e.getMessage()));
+            } catch (FormatException e) {
+                System.err.printf("[ERR] %s%n", e.getMessage());
                 System.exit(4);
             }
-    
+
             try {
                 fis.close();
-            } catch(IOException e) {
+            } catch (IOException e) {
                 System.err.println("[ERR] Failed to close input file!");
                 System.exit(2);
             }
 
             try {
                 fos.close();
-            } catch(IOException e) {
+            } catch (IOException e) {
                 System.err.println("[ERR] Failed to close output file!");
                 System.exit(3);
             }
